@@ -1,15 +1,13 @@
-import { Elysia, t } from 'elysia';
-import { staticPlugin } from '@elysiajs/static';
-import { renderToReadableStream } from 'react-dom/server.browser';
-import { swagger } from '@elysiajs/swagger';
-import { createElement } from 'react';
+import { Elysia, t } from "elysia";
+import { staticPlugin } from "@elysiajs/static";
+import { renderToReadableStream } from "react-dom/server.browser";
+import { swagger } from "@elysiajs/swagger";
+import { createElement } from "react";
 import { readdir } from "node:fs/promises";
-import { extname,join } from "node:path";
-import Home from './pages/Home';
-import About from './pages/About';
-import ClientPortal from './pages/ClientPortal';
+import { extname, join } from "node:path";
+import Home from "./pages/Home";
 
-const host = Bun.env.HOST || 'localhost';
+const host = Bun.env.HOST || "localhost";
 const port = Bun.env.PORT || 3000;
 
 // Define the directory with your entrypoints
@@ -34,7 +32,7 @@ const doYouLikeSwaggerUIBetter = false;
 
 async function handleRequest(
   pageComponent: React.ComponentType,
-  index: string
+  index: string,
 ) {
   const page = createElement(pageComponent);
   const stream = await renderToReadableStream(page, {
@@ -42,7 +40,7 @@ async function handleRequest(
   });
 
   return new Response(stream, {
-    headers: { 'Content-Type': 'text/html' },
+    headers: { "Content-Type": "text/html" },
   });
 }
 
@@ -50,22 +48,20 @@ export const server = new Elysia()
 
   .use(
     staticPlugin({
-      assets: './build',
-      prefix: '',
-    })
+      assets: "./build",
+      prefix: "",
+    }),
   )
   .use(
     swagger({
-      provider: doYouLikeSwaggerUIBetter ? 'swagger-ui' : 'scalar',
-    })
+      provider: doYouLikeSwaggerUIBetter ? "swagger-ui" : "scalar",
+    }),
   )
-  .get('/', () => handleRequest(Home, '/HomeIndex.js'))
-  .get('/about', () => handleRequest(About, '/AboutIndex.js'))
-  .get('/portal', () => handleRequest(ClientPortal, '/ClientPortalIndex.js'))
+  .get("/", () => handleRequest(Home, "/HomeIndex.js"))
 
   .listen(port, () => {
     console.log(`server started on http://${host}:${port}`);
   })
-  .on('error', (error) => {
+  .on("error", (error) => {
     console.error(`Server error: ${error.code}`);
   });

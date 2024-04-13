@@ -2,10 +2,11 @@ import { Elysia, t } from "elysia";
 import { staticPlugin } from "@elysiajs/static";
 import { renderToReadableStream } from "react-dom/server.browser";
 import { swagger } from "@elysiajs/swagger";
-import { createElement } from "react";
+import React, { createElement } from "react";
 import { readdir } from "node:fs/promises";
 import { extname, join } from "node:path";
 import Home from "./pages/Home";
+import { createUser, loginUser } from "./handlers/UserHandler";
 
 const host = Bun.env.HOST || "localhost";
 const port = Bun.env.PORT || 3000;
@@ -58,6 +59,21 @@ export const server = new Elysia()
     }),
   )
   .get("/", () => handleRequest(Home, "/HomeIndex.js"))
+  .get("/auth0-callback", () => new Response("Auth0 Callback"))
+  .post("/signup", ({ body }) => createUser(body), {
+    body: t.Object({
+      firstName: t.String(),
+      lastName: t.String(),
+      email: t.String(),
+      password: t.String(),
+    }),
+  })
+  .post("/login", ({ body }) => loginUser(body), {
+    body: t.Object({
+      email: t.String(),
+      password: t.String(),
+    }),
+  })
 
   .listen(port, () => {
     console.log(`server started on http://${host}:${port}`);
